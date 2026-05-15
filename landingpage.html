@@ -1,0 +1,719 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SharpTip — Análises da Copa do Mundo 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #c8f033;
+    --green-dim: #8aaa22;
+    --bg: #080c0a;
+    --bg2: #0d120e;
+    --bg3: #111a12;
+    --border: #1a2a1c;
+    --text: #e8ede8;
+    --muted: #6a7a6a;
+    --red: #ff4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 700px; height: 500px;
+    background: radial-gradient(ellipse, #c8f03318 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200,240,51,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,240,51,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black, transparent);
+    pointer-events: none;
+  }
+
+  .countdown-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #ff444412;
+    border: 1px solid #ff444433;
+    border-radius: 100px;
+    padding: 8px 20px;
+    margin-bottom: 36px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .cd-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .cd-text { font-size: 13px; font-weight: 700; color: #ff8888; letter-spacing: 0.5px; }
+  .cd-text span { color: #fff; }
+
+  .hero-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 10vw, 100px);
+    line-height: 0.92;
+    letter-spacing: 2px;
+    color: #fff;
+    margin-bottom: 10px;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .hero-title .accent {
+    color: var(--green);
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    letter-spacing: 0px;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(16px, 2.5vw, 20px);
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.6;
+    margin: 24px auto 40px;
+    font-weight: 400;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .hero-subtitle strong { color: var(--text); font-weight: 600; }
+
+  .cta-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--green);
+    color: #080c0a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 18px 40px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 40px #c8f03340;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 50px #c8f03360;
+  }
+
+  .btn-arrow { font-size: 18px; transition: transform 0.2s; }
+  .btn-primary:hover .btn-arrow { transform: translateX(4px); }
+
+  .cta-sub {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.3px;
+  }
+
+  .cta-sub span { color: var(--green); font-weight: 600; }
+
+  /* ─── SOCIAL PROOF STRIP ─── */
+  .proof-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.7s 0.5s ease both;
+  }
+
+  .proof-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .proof-icon { font-size: 16px; }
+  .proof-item strong { color: var(--text); }
+
+  /* ─── SECTION ─── */
+  .section {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 6vw, 56px);
+    line-height: 1;
+    letter-spacing: 1px;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+
+  .section-title em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: var(--green);
+  }
+
+  .section-body {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .section-body strong { color: var(--text); font-weight: 600; }
+
+  /* ─── PROBLEM BLOCK ─── */
+  .problem-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .problem-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .problem-icon { font-size: 20px; flex-shrink: 0; }
+
+  .problem-text { font-size: 15px; color: var(--muted); line-height: 1.5; }
+  .problem-text strong { color: var(--text); display: block; margin-bottom: 2px; }
+
+  /* ─── WHAT YOU GET ─── */
+  .deliverable-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 32px;
+  }
+
+  .deliverable-item {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 16px;
+    align-items: start;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .deliverable-item:last-child { border-bottom: none; }
+
+  .deliverable-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--green);
+    line-height: 1;
+    opacity: 0.4;
+  }
+
+  .deliverable-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .deliverable-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ─── URGENCY BLOCK ─── */
+  .urgency-box {
+    background: linear-gradient(135deg, #c8f03310, #c8f03306);
+    border: 1px solid #c8f03330;
+    border-radius: 16px;
+    padding: 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-top: 60px;
+  }
+
+  .urgency-box::before {
+    content: '⚡';
+    position: absolute;
+    font-size: 180px;
+    opacity: 0.04;
+    top: -20px; right: -20px;
+    line-height: 1;
+  }
+
+  .urgency-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    color: var(--green);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+
+  .urgency-body {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 440px;
+    margin: 0 auto 28px;
+  }
+
+  .urgency-body strong { color: var(--text); }
+
+  /* ─── TESTIMONIALS ─── */
+  .testimonials {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 32px;
+  }
+
+  .testimonial {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .testi-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+
+  .testi-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .testi-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .testi-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .testi-location { font-size: 11px; color: var(--muted); }
+
+  .testi-stars { margin-left: auto; color: var(--green); font-size: 13px; letter-spacing: 1px; }
+
+  /* ─── FINAL CTA ─── */
+  .final-cta {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 80px 24px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .final-glow {
+    position: absolute;
+    bottom: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 500px; height: 300px;
+    background: radial-gradient(ellipse, #c8f03312, transparent 70%);
+    pointer-events: none;
+  }
+
+  .final-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 8vw, 72px);
+    line-height: 0.95;
+    color: #fff;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+
+  .final-title em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: var(--green);
+  }
+
+  .final-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 440px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+  }
+
+  .final-sub strong { color: var(--text); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 24px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: #333;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── HIGHLIGHT ─── */
+  .hl { color: var(--green); font-weight: 700; }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 600px) {
+    .proof-strip { gap: 18px; }
+    .urgency-box { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-grid"></div>
+
+  <div class="countdown-bar">
+    <div class="cd-dot"></div>
+    <div class="cd-text">Copa do Mundo começa em <span>11 de Junho</span> — faltam poucos dias</div>
+  </div>
+
+  <div class="hero-eyebrow">⚡ SharpTip · Análises Desportivas</div>
+
+  <h1 class="hero-title">
+    Para de apostar<br>
+    <span class="accent">às cegas.</span>
+  </h1>
+
+  <p class="hero-subtitle">
+    Cada jogo do Mundial tem <strong>dados que a maioria ignora.</strong>
+    Nós analisamos tudo — estatísticas, forma, confrontos directos —
+    e entregamos numa análise clara, antes de cada jogo.
+  </p>
+
+  <div class="cta-group">
+    <a href="https://t.me/+9ScBDeM1AWo2NDc0" class="btn-primary">
+      Quero acesso gratuito
+      <span class="btn-arrow">→</span>
+    </a>
+    <div class="cta-sub">✓ Grátis · ✓ Sem cartão · <span>✓ Informação privilegiada</span></div>
+  </div>
+</section>
+
+<!-- ═══════════════ PROVA SOCIAL ═══════════════ -->
+<div class="proof-strip">
+  <div class="proof-item"><span class="proof-icon">👥</span> <strong>+2.400</strong> membros activos</div>
+  <div class="proof-item"><span class="proof-icon">⚽</span> <strong>1 análise</strong> por jogo, sem falhas</div>
+  <div class="proof-item"><span class="proof-icon">🌍</span> Portugal · Brasil · Angola · Moçambique e mais</div>
+  <div class="proof-item"><span class="proof-icon">🔒</span> 100% gratuito no Telegram</div>
+</div>
+
+<!-- ═══════════════ PROBLEMA ═══════════════ -->
+<section class="section">
+  <span class="section-tag">O problema</span>
+  <h2 class="section-title">A maioria aposta<br>com <em>instinto.</em></h2>
+  <p class="section-body">
+    O Mundial é o maior evento de apostas do mundo. Milhões de pessoas vão apostar.
+    A maioria vai perder — não porque não tenham sorte,
+    mas porque <strong>apostam sem informação.</strong>
+  </p>
+
+  <div class="problem-list">
+    <div class="problem-item">
+      <div class="problem-icon">😵</div>
+      <div class="problem-text">
+        <strong>Apostam pela emoção</strong>
+        Coração no Brasil, dinheiro no Brasil — independentemente dos dados.
+      </div>
+    </div>
+    <div class="problem-item">
+      <div class="problem-icon">🎲</div>
+      <div class="problem-text">
+        <strong>Ignoram o contexto real do jogo</strong>
+        Lesões, forma recente, confrontos directos, desempenho fora de casa — tudo ignorado.
+      </div>
+    </div>
+    <div class="problem-item">
+      <div class="problem-icon">📉</div>
+      <div class="problem-text">
+        <strong>Não sabem ler odds</strong>
+        Uma odd de 2.00 não significa 50% de probabilidade real — e isso faz toda a diferença.
+      </div>
+    </div>
+    <div class="problem-item">
+      <div class="problem-icon">⏰</div>
+      <div class="problem-text">
+        <strong>Não têm tempo para pesquisar</strong>
+        Uma análise séria demora horas. Quem faz isso antes de cada jogo do Mundial?
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ SOLUÇÃO ═══════════════ -->
+<section class="section">
+  <span class="section-tag">A solução</span>
+  <h2 class="section-title">Nós fazemos<br>o trabalho <em>por ti.</em></h2>
+  <p class="section-body">
+    Antes de cada jogo, a equipa SharpTip analisa tudo o que importa
+    e entrega uma análise completa directamente no teu Telegram —
+    <strong>para tomares decisões com dados, não com emoção.</strong>
+  </p>
+
+  <div class="deliverable-grid">
+    <div class="deliverable-item">
+      <div class="deliverable-num">01</div>
+      <div>
+        <div class="deliverable-title">Forma recente das duas equipas</div>
+        <div class="deliverable-desc">Os últimos 5 jogos de cada equipa — vitórias, empates, derrotas, golos marcados e sofridos. Sabes exactamente quem chega em melhor forma.</div>
+      </div>
+    </div>
+    <div class="deliverable-item">
+      <div class="deliverable-num">02</div>
+      <div>
+        <div class="deliverable-title">Estatísticas avançadas (xG, posse, remates)</div>
+        <div class="deliverable-desc">Não só os resultados — mas o que os números avançados revelam sobre o nível real de cada equipa. O xG não mente.</div>
+      </div>
+    </div>
+    <div class="deliverable-item">
+      <div class="deliverable-num">03</div>
+      <div>
+        <div class="deliverable-title">Confronto directo (Head-to-Head)</div>
+        <div class="deliverable-desc">Como estas duas equipas se enfrentaram nos últimos anos. Há padrões históricos que se repetem — e nós identificamo-los.</div>
+      </div>
+    </div>
+    <div class="deliverable-item">
+      <div class="deliverable-num">04</div>
+      <div>
+        <div class="deliverable-title">Desempenho em casa vs fora</div>
+        <div class="deliverable-desc">Uma equipa pode ser líder em casa e frágil fora. Este dado muda completamente a leitura do jogo.</div>
+      </div>
+    </div>
+    <div class="deliverable-item">
+      <div class="deliverable-num">05</div>
+      <div>
+        <div class="deliverable-title">Mercados Over/Under e Ambas Marcam</div>
+        <div class="deliverable-desc">Percentagens reais de probabilidade para os mercados mais populares — não achismos, dados históricos calculados.</div>
+      </div>
+    </div>
+    <div class="deliverable-item">
+      <div class="deliverable-num">06</div>
+      <div>
+        <div class="deliverable-title">A nossa análise final — clara e directa</div>
+        <div class="deliverable-desc">Depois de tudo analisado, damos a nossa leitura do jogo com nível de confiança. Tu decides o que fazer com essa informação.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ URGÊNCIA ═══════════════ -->
+<section class="section">
+  <div class="urgency-box">
+    <div class="urgency-title">O Mundial começa a 11 de Junho.</div>
+    <p class="urgency-body">
+      São <strong>104 jogos.</strong> Cada jogo é uma oportunidade de apostar
+      com mais informação do que 90% das pessoas à tua volta.
+      <br><br>
+      Quem entra agora recebe as análises desde o primeiro jogo —
+      <strong>gratuitamente, sem compromisso.</strong>
+    </p>
+    <a href="https://t.me/+9ScBDeM1AWo2NDc0" class="btn-primary">
+      Entrar no grupo gratuito
+      <span class="btn-arrow">→</span>
+    </a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ TESTEMUNHOS ═══════════════ -->
+<section class="section">
+  <span class="section-tag">O que dizem</span>
+  <h2 class="section-title">Membros que<br><em>já usam</em> as análises.</h2>
+
+  <div class="testimonials">
+    <div class="testimonial">
+      <div class="testi-text">
+        "Nunca tinha prestado atenção ao desempenho fora de casa. Desde que comecei a usar as análises do SharpTip, a forma como leio os jogos mudou completamente."
+      </div>
+      <div class="testi-author">
+        <div class="testi-avatar">🇵🇹</div>
+        <div>
+          <div class="testi-name">Ricardo M.</div>
+          <div class="testi-location">Lisboa, Portugal</div>
+        </div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+    </div>
+
+    <div class="testimonial">
+      <div class="testi-text">
+        "O que mais gosto é da análise de Over/Under. Antes apostava sempre no resultado — agora diversifico muito mais e com mais confiança."
+      </div>
+      <div class="testi-author">
+        <div class="testi-avatar">🇧🇷</div>
+        <div>
+          <div class="testi-name">Fernanda C.</div>
+          <div class="testi-location">São Paulo, Brasil</div>
+        </div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+    </div>
+
+    <div class="testimonial">
+      <div class="testi-text">
+        "Conteúdo sério, bem apresentado, sem exageros. Finalmente uma fonte que fala com dados e não promete mundos e fundos."
+      </div>
+      <div class="testi-author">
+        <div class="testi-avatar">🇦🇴</div>
+        <div>
+          <div class="testi-name">Hélder N.</div>
+          <div class="testi-location">Luanda, Angola</div>
+        </div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FINAL CTA ═══════════════ -->
+<div class="final-cta">
+  <div class="final-glow"></div>
+
+  <h2 class="final-title">
+    Não vejas o Mundial<br>
+    sem <em>contexto.</em>
+  </h2>
+
+  <p class="final-sub">
+    Entra no grupo gratuito do SharpTip e recebe
+    a análise completa de <strong>cada jogo da Copa do Mundo 2026</strong>
+    directamente no teu Telegram.
+  </p>
+
+  <a href="https://t.me/+9ScBDeM1AWo2NDc0" class="btn-primary" style="font-size:18px; padding: 20px 48px;">
+    Quero acesso gratuito agora
+    <span class="btn-arrow">→</span>
+  </a>
+
+  <p style="margin-top: 20px; font-size: 12px; color: var(--muted);">
+    ✓ Sem pagamento &nbsp;·&nbsp; ✓ Sem registo &nbsp;·&nbsp; ✓ Sai quando quiseres
+  </p>
+</div>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  © 2026 SharpTip · Análises Desportivas &nbsp;·&nbsp;
+  As análises têm fins informativos. Aposte com responsabilidade. +18.
+  &nbsp;·&nbsp; sharptip.bet
+</footer>
+
+</body>
+</html>
